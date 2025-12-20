@@ -8,7 +8,7 @@
 
 ---
 
-## Features
+## 👤 Features
 
 OsintDroid provides a simple, menu-driven interface with the following options:
 
@@ -25,7 +25,7 @@ OsintDroid provides a simple, menu-driven interface with the following options:
 
 ---
 
-## Requirements
+## 🛠️ Requirements
 
 - **Linux** or a Bash environment
 - **ADB (Android Debug Bridge)** installed and accessible in your system PATH
@@ -34,7 +34,7 @@ OsintDroid provides a simple, menu-driven interface with the following options:
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 1. Clone this repository:
 
@@ -53,7 +53,7 @@ chmod +x OsintDroid.sh
 
 ---
 
-## Usage
+## 📱 Usage
 
 Run the script:
 
@@ -68,7 +68,7 @@ Run the script:
 
 ---
 
-## Notes
+## 📑 Notes
 
 * All actions are **read-only** and safe for educational and testing purposes on devices you own.
 * Make sure **USB debugging** is enabled and the device authorizes your computer.
@@ -76,21 +76,21 @@ Run the script:
 
 ---
 
-### ⚖️ Legal & Ethical Notice
+## ⚖️ Legal & Ethical Notice
 
 This toolkit is for **authorized forensic analysis only**.
 Ensure compliance with local laws and privacy regulations. Unauthorized data extraction may violate legal boundaries.
 
 ---
 
-### 💬 Feedback & Contributions
+## 💬 Feedback & Contributions
 
 If you have ideas, want to add new ADB command modules, or improve automation — open an issue or submit a pull request!
 Let’s build an open, transparent, and responsible forensic community.
 
 ---
 
-### ☕ Support This Project
+## ☕ Support This Project
 
 If **OsintDroid™** helps your OSINT, consider supporting continued development:
 
