@@ -98,7 +98,7 @@ option_8() {
 }
 
 option_9() {
-    # --- Interaktive Abfrage für JSON Export ---
+    # --- ask for JSON export ---
     local json_file=""
     local first_json_entry=true
     
@@ -124,15 +124,16 @@ option_9() {
 
     for pkg in ${package_name_trim}; do
 
-        # Die Codes zuerst in Variable speichern, statt direkt auszugeben
-        # Das "|| true" verhindert Fehler, falls grep nichts findet
+        # we store the codes in variable instead of printing them directly
+        # this "|| true" prevents errors if egrep does not find anything
         codes=$(adb shell pm dump "${pkg}" \
             | grep -E 'Scheme: "android_secret_code"|Authority: "[0-9].*"|Authority: "[A-Z].*"' || true)
 
         # Prüfen ob Variable nicht leer ist (nur dann Ausgabe)
+        # if var is not empty, print it
         if [[ -n "$codes" ]]; then
             
-            # --- Konsolen-Ausgabe ---
+            # --- console output ---
             echo -e "${GREEN}Package:${RESET} ${pkg}"
             
             echo "$codes" | while IFS= read -r line; do
@@ -140,28 +141,28 @@ option_9() {
             done
             echo
 
-            # --- JSON-Export (falls aktiviert) ---
+            # --- JSON-Export (if activated) ---
             if [[ -n "$json_file" ]]; then
-                # Komma setzen, wenn es nicht der erste Eintrag ist
+                # put a comma if it is not the first entry
                 if [ "$first_json_entry" = true ]; then
                     first_json_entry=false
                 else
                     echo "," >> "$json_file"
                 fi
 
-                # Codes für JSON formatieren:
-                # 1. Backslashes und Anführungszeichen escapen
-                # 2. Jede Zeile in Anführungszeichen setzen
-                # 3. Zeilen mit Kommas verbinden
+                # format codes for json (maybe do it nicer):
+                # 1. escape backslashes and semicolons
+                # 2. put every line in quotation marks
+                # 3. combine lines with commas
                 json_codes_array=$(echo "$codes" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{print "\""$0"\""}' | paste -sd, -)
 
-                # JSON-Objekt schreiben
+                # write the JSON-object
                 echo "  { \"package\": \"$pkg\", \"codes\": [$json_codes_array] }" >> "$json_file"
             fi
         fi
     done
 
-    # JSON Array schließen
+    # close the JSON array
     if [[ -n "$json_file" ]]; then
         echo "]" >> "$json_file"
         echo -e "${GREEN}JSON export saved to: ${json_file}${RESET}"
