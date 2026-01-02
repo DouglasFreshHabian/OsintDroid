@@ -51,7 +51,7 @@ menu() {
     echo -e "${GREEN}  6)${RESET} Dump SMS"
     echo -e "${GREEN}  7)${RESET} List All APKs"
     echo -e "${GREEN}  8)${RESET} List 3rd Party"
-    echo -e "${GREEN}  9)${RESET} Dump Secret Codes"
+    echo -e "${GREEN}  9)${RESET} Dump Secret Codes (Filtered + JSON Option)"
     echo -e "${GREEN}  0)${RESET} Exit"
     echo
 }
@@ -98,7 +98,23 @@ option_8() {
 }
 
 option_9() {
-    echo -e "${GREEN}Dumping Android secret codes from system packages...${RESET}"
+    # --- ask for JSON export ---
+    local json_file=""
+    local first_json_entry=true
+    
+    echo -e "${CYAN}Output to JSON file? (y/N):${RESET} \c"
+    read -r want_json
+    if [[ "$want_json" =~ ^[Yy]$ ]]; then
+        echo -e "${CYAN}Enter filename (e.g. codes.json):${RESET} \c"
+        read -r json_file
+        # Fallback Name, falls leer
+        if [[ -z "$json_file" ]]; then json_file="secret_codes.json"; fi
+        
+        echo "[" > "$json_file"
+        echo -e "${YELLOW}Writing output to ${json_file}...${RESET}"
+    fi
+
+    echo -e "${GREEN}Scanning system packages for Android secret codes...${RESET}"
     echo
 
     # Get system package names
@@ -108,17 +124,48 @@ option_9() {
 
     for pkg in ${package_name_trim}; do
 
-        # Print package name
-        echo -e "${GREEN}Package:${RESET} ${pkg}"
+        # we store the codes in variable instead of printing them directly
+        # this "|| true" prevents errors if egrep does not find anything
+        codes=$(adb shell pm dump "${pkg}" \
+            | grep -E 'Scheme: "android_secret_code"|Authority: "[0-9].*"|Authority: "[A-Z].*"' || true)
 
-        adb shell pm dump "${pkg}" \
-            | grep -E 'Scheme: "android_secret_code"|Authority: "[0-9].*"|Authority: "[A-Z].*"' \
-            | while IFS= read -r line; do
+        # if var is not empty, print it
+        if [[ -n "$codes" ]]; then
+            
+            # --- console output ---
+            echo -e "${GREEN}Package:${RESET} ${pkg}"
+            
+            echo "$codes" | while IFS= read -r line; do
                 echo -e "  ${GREEN}${line}${RESET}"
             done
+            echo
 
-        echo
+            # --- JSON-Export (if activated) ---
+            if [[ -n "$json_file" ]]; then
+                # put a comma if it is not the first entry
+                if [ "$first_json_entry" = true ]; then
+                    first_json_entry=false
+                else
+                    echo "," >> "$json_file"
+                fi
+
+                # format codes for json (maybe do it nicer):
+                # 1. escape backslashes and semicolons
+                # 2. put every line in quotation marks
+                # 3. combine lines with commas
+                json_codes_array=$(echo "$codes" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{print "\""$0"\""}' | paste -sd, -)
+
+                # write the JSON-object
+                echo "  { \"package\": \"$pkg\", \"codes\": [$json_codes_array] }" >> "$json_file"
+            fi
+        fi
     done
+
+    # close the JSON array
+    if [[ -n "$json_file" ]]; then
+        echo "]" >> "$json_file"
+        echo -e "${GREEN}JSON export saved to: ${json_file}${RESET}"
+    fi
 
     echo -e "${GREEN}Secret code dump complete.${RESET}"
 }
