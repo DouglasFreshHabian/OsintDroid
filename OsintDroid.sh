@@ -64,7 +64,7 @@ option_1() {
 
 option_2() {
     echo -e "${GREEN}Listing all emails used on device:${RESET}"
-    adb shell dumpsys | grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b"
+    adb shell dumpsys account | grep -aE -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
 }
 
 option_3() {
